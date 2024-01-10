@@ -200,13 +200,13 @@ plt.figure(figsize=(6, 6), dpi=500)
 
 plotting_raw_data(X,y, alpha, s, color, 'Raw data', True)
 
-df_SCPTu_SCPT = remove_outliers(df_SCPTu_SCPT, 'Vs (m/s)')
-df_SCPTu_SCPT = df_SCPTu_SCPT[(df_SCPTu_SCPT['Vs (m/s)'] > 0)]
+# df_SCPTu_SCPT = remove_outliers(df_SCPTu_SCPT, 'Vs (m/s)')
+# df_SCPTu_SCPT = df_SCPTu_SCPT[(df_SCPTu_SCPT['Vs (m/s)'] > 0)]
 
-X = df_SCPTu_SCPT[selected_columns_x]#.to_numpy()
-y = df_SCPTu_SCPT['Vs (m/s)']#.to_numpy()
+# X = df_SCPTu_SCPT[selected_columns_x]#.to_numpy()
+# y = df_SCPTu_SCPT['Vs (m/s)']#.to_numpy()
 
-plotting_raw_data(X,y, alpha, s, 'r', 'Removed outliers', False)
+# plotting_raw_data(X,y, alpha, s, 'r', 'Removed outliers', False)
 
 
 # =============================================================================
@@ -259,7 +259,7 @@ plt.tight_layout()
 
 
 print('-----------------------------------------')
-print('Performance of ML model:\n')
+print('Performance of XGB ML model:\n')
 # Check performance on test data
 y_pred = clf.predict(X_test)
 # Calculate the R-squared score, Mean squared error
@@ -288,17 +288,27 @@ import sklearn.tree as tree
 clf2 = HistGradientBoostingRegressor()
 clf2.fit(X_train, y_train)
 
-y_pred2 = clf2.predict(X_test)
-
-score2 = r2_score(y_test, y_pred2)
-mse2 = mean_squared_error(y_test, y_pred2)
 
 print('-----------------------------------------')
-print('Performance of ML model:\n')
-print(f'Test Data - R2: {round(score2, 3)}, MSE: {round(mse2, 3)}.')
+print('Performance of Hist ML model:\n')
+# Check performance on test data
+y_pred = clf2.predict(X_test)
+# Calculate the R-squared score, Mean squared error
+score = r2_score(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+print(f'Test Data - R2: {round(score, 3)}, MSE: {round(mse, 3)}.')
+
+error_plot(y_test, y_pred, f'HistGradientBoostingRegressor; R2: {round(score, 3)}, MSE: {round(mse, 3)}')
+
+# Check performance on train data
+y_pred = clf2.predict(X_train)
+# Calculate the R-squared score, Mean squared error
+score = r2_score(y_train, y_pred)
+mse = mean_squared_error(y_train, y_pred)
+print(f'Training Data - R2: {round(score, 3)}, MSE: {round(mse, 3)}.')
 print('-----------------------------------------\n')
 
-error_plot(y_test, y_pred2, f'HistGradientBoostingRegressor; R2: {round(score2, 3)}, MSE: {round(mse2, 3)}')
+
 
 # =============================================================================
 # Training of machine learning model
@@ -332,18 +342,28 @@ regr = MLPRegressor(hidden_layer_sizes=(100,100,100,100),
                     early_stopping = True,
                     validation_fraction = 0.1,
                     max_iter=500).fit(X_train, y_train)
-y_pred2 = regr.predict(X_test)
-
-
-score2 = r2_score(y_test, y_pred2)
-mse2 = mean_squared_error(y_test, y_pred2)
 
 print('-----------------------------------------')
-print('Performance of ML model:\n')
-print(f'Test Data - R2: {round(score2, 3)}, MSE: {round(mse2, 3)}.')
+print('Performance of Hist ML model:\n')
+# Check performance on test data
+y_pred = regr.predict(X_test)
+# Calculate the R-squared score, Mean squared error
+score = r2_score(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+print(f'Test Data - R2: {round(score, 3)}, MSE: {round(mse, 3)}.')
+
+error_plot(y_test, y_pred, f'MLPRegressor; R2: {round(score, 3)}, MSE: {round(mse, 3)}')
+
+
+# Check performance on train data
+y_pred = regr.predict(X_train)
+# Calculate the R-squared score, Mean squared error
+score = r2_score(y_train, y_pred)
+mse = mean_squared_error(y_train, y_pred)
+print(f'Training Data - R2: {round(score, 3)}, MSE: {round(mse, 3)}.')
 print('-----------------------------------------\n')
 
-error_plot(y_test, y_pred2, f'MLPRegressor; R2: {round(score2, 3)}, MSE: {round(mse2, 3)}')
+
 
 
 
