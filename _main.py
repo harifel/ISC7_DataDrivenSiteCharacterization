@@ -1,16 +1,19 @@
 import pandas as pd
 import numpy as np
+
+from functions import plotting_raw_data, remove_outliers, error_plot, plot_cpt_data, plot_cpt_data_ML_prediction
+
+
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-import xgboost as xgb
 from sklearn.metrics import r2_score, mean_squared_error
-from sklearn.metrics import PredictionErrorDisplay
+from sklearn.preprocessing import StandardScaler
 
 
 ######################## Define the text size of each plot globally ###########
-SMALL_SIZE = 8
+SMALL_SIZE = 10
 MEDIUM_SIZE = 10
-BIGGER_SIZE = 12
+BIGGER_SIZE = 10
 
 plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
 plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
@@ -32,74 +35,24 @@ file_path = r"C:\Users\haris\Documents\GitHub\DATA-DRIVEN-SITE-CHARACTERIZATION\
 df_raw = pd.read_csv(file_path)
 
 
-# # # Remove rows with NaN entries in Vs column
-# df_raw = df_raw.dropna(subset=['Vs (m/s)'])
-
-
 # Select only SCPTu data
 df_SCPTu = df_raw[df_raw['test_type'] == 'SCPTu']
-
 # Select only SCPT data
 df_SCPT = df_raw[df_raw['test_type'] == 'SCPT']
 # Select both SCPTu and SPT data
 df_SCPTu_SCPT = df_raw[(df_raw['test_type'] == 'SCPTu') | (df_raw['test_type'] == 'SCPT')]
+df_SCPTu_SCPT_mean = df_raw[(df_raw['test_type'] == 'SCPTu') | (df_raw['test_type'] == 'SCPT')]
 
 
 selected_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)', 'u0 (kPa)']
 selected_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)', 'u0 (kPa)', "σ',v (kPa)"]
 
 for column in selected_columns_x:
-    #window_size = int(0.25 / (df_SCPTu_SCPT[column].diff().abs().mean()))
-    #df_SCPTu_SCPT[column+"_mean"] = df_SCPTu_SCPT[column].rolling(window=50).mean()
     df_SCPTu_SCPT[column] = df_SCPTu_SCPT[column].rolling(window=50).mean()
+    df_SCPTu_SCPT_mean[column+"_mean"] = df_SCPTu_SCPT_mean[column].rolling(window=50).mean()
 
 df_SCPTu_SCPT = df_SCPTu_SCPT.dropna(subset=['Vs (m/s)'])
-
-plot_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)', 'u0 (kPa)', 'Vs (m/s)']
-unique_ids = df_SCPTu_SCPT['ID'].unique()
-
-# # Iterate over unique IDs
-# for id_value in unique_ids:
-#     fig, axes = plt.subplots(1, len(plot_columns_x)-1, figsize=(10, 5), dpi=500)
-
-#     # Select data for the current ID
-#     df_id = df_SCPTu_SCPT[df_raw['ID'] == id_value]
-
-#     for i, column in enumerate(plot_columns_x[1:-1]):
-#         # Plot measured data
-#         axes[i].plot(df_id[column].values,
-#                      df_id[plot_columns_x[0]].values,
-#                       label='Raw data',
-#                       marker='o', color='k', linewidth = 0.5, markersize=2)
-#         axes[i].plot(df_id[column+"_mean"].values,
-#                      df_id[plot_columns_x[0]].values,
-#                       label='Smoothed data',
-#                       marker='o', color='r', linewidth = 0.5, markersize=2)
-
-#         axes[i].set_xlabel(column)
-#         axes[i].set_ylabel('Depth [m]')
-#         axes[i].grid(True, which='both')
-#         axes[i].legend()
-#         axes[i].minorticks_on()
-#         axes[i].invert_yaxis()
-
-#     axes[-1].plot(df_id[plot_columns_x[-1]].values,
-#                  df_id[plot_columns_x[0]].values,
-#                   label='Raw data',
-#                   marker='o', color='k', linewidth = 0.5, markersize=2)
-#     axes[-1].set_xlabel(plot_columns_x[-1])
-#     axes[-1].set_ylabel('Depth [m]')
-#     axes[-1].grid(True, which='both')
-#     axes[-1].legend()
-#     axes[-1].minorticks_on()
-#     axes[-1].invert_yaxis()
-
-#     plt.title(f'CPT Data ID: {id_value}')
-#     plt.tight_layout()
-#     plt.savefig(f"CPT_RAW_filterd_id_{id_value}.png", dpi=500)
-#     print(id_value)
-
-#     # break
+df_SCPTu_SCPT_mean = df_SCPTu_SCPT_mean.dropna(subset=['Vs (m/s)'])
 
 # count number of tests in both subsets
 SCPTu_number = df_SCPTu['ID'].nunique()
@@ -114,91 +67,40 @@ print('Number of tests in SCPTu and SCPT =', combined_number)
 print('-----------------------------------------\n')
 
 # =============================================================================
-# Plotting the data
+# Plotting the data and Selecting features
 # =============================================================================
+cm = 1/2.54  # centimeters in inches
 
 # Select columns
 #selected_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)', 'u2 (kPa)']
 selected_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)', 'u0 (kPa)']
-selected_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)', 'u0 (kPa)', "σ',v (kPa)"]
-#selected_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)']
-#selected_columns_x = ['Depth (m)'+"_mean",'qc (MPa)'+"_mean", 'fs (kPa)'+"_mean", 'Rf (%)'+"_mean", 'u0 (kPa)'+"_mean"]
-#selected_columns_x = ['qc (MPa)', 'fs (kPa)', 'Rf (%)']
+selected_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)']
+#selected_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)', 'u0 (kPa)', "σ',v (kPa)"]
+plot_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)', 'u0 (kPa)', 'Vs (m/s)']
+plot_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)', 'Vs (m/s)']
 
-# X = df_train_Vs[['qc_mean', 'fs_mean', 'Rf_mean']]
-# y = df_train_Vs['Vs (m/s)']
 
-#selected_columns_x = ['qc (MPa)', 'fs (kPa)','Depth (m)', 'u2 (kPa)']
-#selected_columns_x = ['qc (MPa)', 'fs (kPa)', 'Rf (%)','Depth (m)']
-#selected_columns_x = ['qc (MPa)', 'fs (kPa)', 'Rf (%)']
-#selected_columns_x = ['Rf (%)', 'qc (MPa)', 'fs (kPa)', 'u2 (kPa)']
+
+#Plot CPT: raw data and mean data
+unique_ids = df_SCPTu_SCPT_mean['ID'].unique()
+id_value = np.random.choice(unique_ids)
+plot_cpt_data((17*cm, 10*cm), plot_columns_x, df_raw, df_SCPTu_SCPT_mean, id_value=id_value)
+plt.savefig(f"A_CPT_RAW_filterd_id_{id_value}.png", dpi=700)
 
 X = df_SCPTu_SCPT[selected_columns_x]#.to_numpy()
 y = df_SCPTu_SCPT['Vs (m/s)']#.to_numpy()
 
+
+
+
 s = 1  # Adjust the marker size as needed
-color = 'blue'  # Adjust the marker color as needed
+color = 'k'  # Adjust the marker color as needed
 alpha = 0.5
 
-
-def plotting_raw_data(X,y, alpha, s, color, label, grid):
-    # Create a single figure with subplots
-
-    # First subplot
-    plt.subplot(2, 2, 1)
-    plt.scatter(y, X.iloc[:, 0], alpha=alpha, s=s, c=color, label = label)
-    plt.xlabel('$v_s$ (m/s)')
-    plt.ylabel('Depth (m)')
-    if grid == True:
-        plt.grid()
-    plt.legend(loc = 'upper right')
-
-    # Second subplot
-    plt.subplot(2, 2, 2)
-    plt.scatter(y, X.iloc[:, 1], alpha=alpha, s=s, c=color, label = label)
-    plt.xlabel('$v_s$ (m/s)')
-    plt.ylabel('$q_c$ (MPa)')
-    if grid == True:
-        plt.grid()
-    plt.legend(loc = 'upper right')
-
-    # Third subplot
-    plt.subplot(2, 2, 3)
-    plt.scatter(y, X.iloc[:, 2], alpha=alpha, s=s, c=color, label = label)
-    plt.xlabel('$v_s$ (m/s)')
-    plt.ylabel('$f_s$ (kPa)')
-    plt.legend(loc = 'upper right')
-    if grid == True:
-        plt.grid()
-
-    # # Fourth subplot
-    # plt.subplot(2, 2, 4)
-    # plt.scatter(y, X.iloc[:, 4], alpha=alpha, s=s, c=color, label = label)
-    # plt.xlabel('$v_s$ (m/s)')
-    # plt.ylabel('$u_2$ (kPa)')
-    # plt.legend(loc = 'upper right')
-    # if grid == True:
-    #     plt.grid()
-
-    # Adjust layout to prevent overlapping
-    plt.tight_layout()
-
-
-def remove_outliers(df, column):
-    Q1 = df[column].quantile(0.25)
-    Q3 = df[column].quantile(0.75)
-
-    IQR = Q3 - Q1
-
-    lower_bound = Q1 - 2 * IQR
-    upper_bound = Q3 + 2 * IQR
-
-    return df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
-
-
-plt.figure(figsize=(6, 6), dpi=500)
-
+#Plot scatter points: raw data points as
+fig = plt.figure(figsize=(8*cm, 20*cm), dpi=500)
 plotting_raw_data(X,y, alpha, s, color, 'Raw data', True)
+plt.savefig("B_Raw_data.png", dpi = 700)
 
 # df_SCPTu_SCPT = remove_outliers(df_SCPTu_SCPT, 'Vs (m/s)')
 # df_SCPTu_SCPT = df_SCPTu_SCPT[(df_SCPTu_SCPT['Vs (m/s)'] > 0)]
@@ -212,50 +114,78 @@ plotting_raw_data(X,y, alpha, s, color, 'Raw data', True)
 # =============================================================================
 # Training of machine learning model
 # =============================================================================
-
-
-def error_plot(y_true, y_pred, title):
-    # Define plot structure
-    fig, axs = plt.subplots(ncols=1, figsize=(5, 5), dpi=500)
-
-    # Create an instance of PredictionErrorDisplay
-    ped = PredictionErrorDisplay.from_predictions(y_true=y_true,
-                                                  y_pred=y_pred,
-                                                  kind="actual_vs_predicted",
-                                                  #subsample=1000,
-                                                  ax=axs,
-                                                  random_state=0)
-
-    # Set the x and y labels of the PredictionErrorDisplay plot
-    ped.ax_.set_xlabel("Predicted $v_s$ (m/s)")  # Set x label
-    ped.ax_.set_ylabel("Actual $v_s$ (m/s)")  # Set y label
-    ped.ax_.set_title(title)  # Set title
-
-    # Add grid
-    ped.ax_.grid()
-
+import xgboost as xgb
+from sklearn.model_selection import StratifiedKFold
+from sklearn.base import clone
 
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,random_state=2)
-X_train, x_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2,random_state=2)
+#X_train, x_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2,random_state=2)
+
+# # Normalize the data
+# scaler = StandardScaler()
+# X_train = scaler.fit_transform(X_train)
+# x_val = scaler.transform(x_val)
+# X_test = scaler.transform(X_test)
 
 
+# ##### # XGB Booster
+# clf = xgb.XGBRegressor(objective='reg:squarederror', tree_method="hist",
+#                         n_estimators=20, n_jobs=None, max_depth=5,
+#                         subsample=0.7, learning_rate = 0.3, early_stopping_rounds=20)
 
+# clf.fit(X_train, y_train, eval_set=[(X_train, y_train),(x_val, y_val)])
+
+
+def fit_and_score(estimator, X_train, x_val, y_train, y_val):
+    """Fit the estimator on the train set and score it on both sets"""
+    estimator.fit(X_train, y_train, eval_set=[(X_train, y_train),(x_val, y_val)])
+
+    train_score = estimator.score(X_train, y_train)
+    val_score = estimator.score(x_val, y_val)
+
+    return estimator, train_score, val_score
+
+
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=2)
 ##### # XGB Booster
 clf = xgb.XGBRegressor(objective='reg:squarederror', tree_method="hist",
                         n_estimators=20, n_jobs=None, max_depth=5,
-                        subsample=0.7, learning_rate = 0.3,)
+                        subsample=0.7, learning_rate = 0.3, early_stopping_rounds=30)
 
-clf.fit(X_train, y_train)
+results = {}
 
-fig, ax = plt.subplots(figsize=(5, 5), dpi = 500)
-xgb.plot_importance(clf, ax = ax)
-plt.tight_layout()
 
-fig, ax = plt.subplots(figsize=(5, 5), dpi = 500)
-xgb.plot_tree(clf, ax=ax, rankdir='LR')
-ax.set_title('XGBoost Decision Tree')
-plt.tight_layout()
+for train_idx, val_idx in cv.split(X_train, y_train):
+    X_train_fold = X_train.iloc[train_idx]
+    x_val_fold = X_train.iloc[val_idx]
+    y_train_fold = y_train.iloc[train_idx]
+    y_val_fold = y_train.iloc[val_idx]
+    est, train_score, val_score = fit_and_score(
+        clone(clf), X_train_fold, x_val_fold, y_train_fold, y_val_fold
+    )
+    results[est] = (train_score, val_score)
+
+
+# fig, axs = plt.subplots(ncols=1, figsize=(8*cm, 8*cm), dpi=500)
+# results = clf.evals_result()
+# plt.plot(results["validation_0"]["rmse"], label="Training loss")
+# plt.plot(results["validation_1"]["rmse"], label="Validation loss")
+# plt.axvline(clf.best_iteration, color="k",linestyle="--", label="Optimal tree number")
+# plt.xlabel("Number of trees [-]")
+# plt.ylabel("Loss [m/s]")
+# plt.grid()
+# plt.legend()
+
+
+# fig, ax = plt.subplots(figsize=(8*cm, 8*cm), dpi = 500)
+# xgb.plot_importance(clf, ax = ax)
+# plt.tight_layout()
+
+# fig, ax = plt.subplots(figsize=(8*cm, 20*cm), dpi = 500)
+# xgb.plot_tree(clf, ax=ax, rankdir='LR')
+# ax.set_title('XGBoost Decision Tree')
+# plt.tight_layout()
 
 
 print('-----------------------------------------')
@@ -267,8 +197,7 @@ score = r2_score(y_test, y_pred)
 mse = mean_squared_error(y_test, y_pred)
 print(f'Test Data - R2: {round(score, 3)}, MSE: {round(mse, 3)}.')
 
-error_plot(y_test, y_pred, f'XGBRegressor; R2: {round(score, 3)}, MSE: {round(mse, 3)}')
-
+error_plot((8*cm, 8*cm), y_test, y_pred, f'XGBRegressor; R2: {round(score, 3)}, MSE: {round(mse, 3)}')
 
 # Check performance on train data
 y_pred = clf.predict(X_train)
@@ -298,10 +227,75 @@ score = r2_score(y_test, y_pred)
 mse = mean_squared_error(y_test, y_pred)
 print(f'Test Data - R2: {round(score, 3)}, MSE: {round(mse, 3)}.')
 
-error_plot(y_test, y_pred, f'HistGradientBoostingRegressor; R2: {round(score, 3)}, MSE: {round(mse, 3)}')
+error_plot((8*cm, 8*cm),y_test, y_pred, f'HistGradientBoostingRegressor; R2: {round(score, 3)}, MSE: {round(mse, 3)}')
 
 # Check performance on train data
 y_pred = clf2.predict(X_train)
+# Calculate the R-squared score, Mean squared error
+score = r2_score(y_train, y_pred)
+mse = mean_squared_error(y_train, y_pred)
+print(f'Training Data - R2: {round(score, 3)}, MSE: {round(mse, 3)}.')
+print('-----------------------------------------\n')
+
+
+# =============================================================================
+# Training of machine learning model
+# =============================================================================
+
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
+
+check_column = []
+
+for column in selected_columns_x:
+    if df_SCPTu_SCPT[column].isnull().any():
+        check_column.append('nan')
+    else:
+        check_column.append('non_nan')
+
+    if 'nan' in check_column:
+        # Handle the case when at least one column contains NaN values
+        pass
+    else:
+        # Drop rows with NaN values in the selected columns
+        df_SCPTu_SCPT.dropna(subset=selected_columns_x, inplace=True)
+
+
+X = df_SCPTu_SCPT[selected_columns_x]#.to_numpy()
+y = df_SCPTu_SCPT['Vs (m/s)']#.to_numpy()
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,random_state=2)
+X_train, x_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2,random_state=2)
+
+
+# # Normalize the data
+# scaler = StandardScaler()
+# X_train = scaler.fit_transform(X_train)
+# x_val = scaler.transform(x_val)
+# X_test = scaler.transform(X_test)
+
+
+# Create the regressor
+regressor = RandomForestRegressor()
+
+# Train the regressor on the training data
+regressor.fit(X_train, y_train)
+
+
+print('-----------------------------------------')
+print('Performance of RandomForestRegressor ML model:\n')
+# Check performance on test data
+y_pred = regressor.predict(X_test)
+# Calculate the R-squared score, Mean squared error
+score = r2_score(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+print(f'Test Data - R2: {round(score, 3)}, MSE: {round(mse, 3)}.')
+
+error_plot((8*cm, 8*cm),y_test, y_pred, f'RandomForestRegressor; R2: {round(score, 3)}, MSE: {round(mse, 3)}')
+
+
+# Check performance on train data
+y_pred = regressor.predict(X_train)
 # Calculate the R-squared score, Mean squared error
 score = r2_score(y_train, y_pred)
 mse = mean_squared_error(y_train, y_pred)
@@ -316,24 +310,6 @@ print('-----------------------------------------\n')
 from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import train_test_split
 
-# Read the CSV file into a DataFrame
-df_raw = pd.read_csv(file_path)
-
-# Remove rows with NaN entries in Vs column
-df_raw = df_raw.dropna(subset=['Vs (m/s)'])
-df_raw = df_raw.dropna(subset=['fs (kPa)'])
-df_raw = df_raw.dropna(subset=['qc (MPa)'])
-df_raw = df_raw.dropna(subset=['Rf (%)'])
-df_raw = df_raw.dropna(subset=['u2 (kPa)'])
-
-# Select both SCPTu and SPT data
-df_SCPTu_SCPT = df_raw[(df_raw['test_type'] == 'SCPTu') | (df_raw['test_type'] == 'SCPT')]
-
-
-X = df_SCPTu_SCPT[selected_columns_x].to_numpy()
-y = df_SCPTu_SCPT['Vs (m/s)'].to_numpy()
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
 
 regr = MLPRegressor(hidden_layer_sizes=(100,100,100,100),
                     random_state=1,
@@ -344,7 +320,7 @@ regr = MLPRegressor(hidden_layer_sizes=(100,100,100,100),
                     max_iter=500).fit(X_train, y_train)
 
 print('-----------------------------------------')
-print('Performance of Hist ML model:\n')
+print('Performance of MLPRegressor ML model:\n')
 # Check performance on test data
 y_pred = regr.predict(X_test)
 # Calculate the R-squared score, Mean squared error
@@ -352,8 +328,7 @@ score = r2_score(y_test, y_pred)
 mse = mean_squared_error(y_test, y_pred)
 print(f'Test Data - R2: {round(score, 3)}, MSE: {round(mse, 3)}.')
 
-error_plot(y_test, y_pred, f'MLPRegressor; R2: {round(score, 3)}, MSE: {round(mse, 3)}')
-
+error_plot((8*cm, 8*cm),y_test, y_pred, f'MLPRegressor; R2: {round(score, 3)}, MSE: {round(mse, 3)}')
 
 # Check performance on train data
 y_pred = regr.predict(X_train)
@@ -367,49 +342,8 @@ print('-----------------------------------------\n')
 
 
 
-
 # =============================================================================
 # Comparison on test data
 # =============================================================================
-
-
-# Read the CSV file into a DataFrame
-df_raw = pd.read_csv(file_path)
-# Select both SCPTu and SPT data
-df_SCPTu_SCPT = df_raw[(df_raw['test_type'] == 'SCPTu') | (df_raw['test_type'] == 'SCPT')]
-#df_SCPTu_SCPT = df_raw[(df_raw['test_type'] == 'SCPT')]
-# Get unique IDs from the DataFrame
-unique_ids = df_SCPTu_SCPT['ID'].unique()
-
-#selected_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)', 'u0 (kPa)']
-
-# Iterate over unique IDs
-for id_value in unique_ids:
-    plt.figure(figsize=(4, 5), dpi = 500)
-
-    # Select data for the current ID
-    df_id = df_raw[df_raw['ID'] == id_value]
-
-    # Drop rows with NaN values
-    df_id = df_id.dropna(subset=['Vs (m/s)'])
-
-    # Make predictions for the selected data
-    df_id['Vs_ML_predicted'] = clf.predict(df_id[selected_columns_x])
-
-    # Plot measured data
-    plt.plot(df_id['Vs (m/s)'], df_id['Depth (m)'], label=f'Measurement Data (ID {id_value})', marker='o')
-    # Plot ML predictions
-    plt.plot(df_id['Vs_ML_predicted'], df_id['Depth (m)'], label=f'ML Prediction (ID {id_value})', linestyle='--', marker='x')
-
-    # Set plot labels and title
-    plt.title(f'Comparison of ML Predictions and Measurement Data ID = {id_value}')
-    plt.xlabel('Vs [m/s]')
-    plt.ylabel('Depth [m]')
-    #plt.xlim(xmin=0, xmax=500)
-    plt.gca().invert_yaxis()
-    plt.grid(True)
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(f"u2_CPT_id_{id_value}.png", dpi = 500)
-    print(id_value)
-    break
+plot_cpt_data_ML_prediction((8*cm, 12*cm), df_raw, df_SCPTu_SCPT, id_value, selected_columns_x, clf)
+plt.savefig(f"u2_CPT_id_{id_value}.png", dpi = 700)
