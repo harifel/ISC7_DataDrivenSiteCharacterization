@@ -32,7 +32,7 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 # =============================================================================
 
 # File path
-file_path = r"C:\Users\haris\Documents\GitHub\DATA-DRIVEN-SITE-CHARACTERIZATION\CPT_PremstallerGeotechnik_revised.csv"
+file_path = r"CPT_PremstallerGeotechnik_revised.csv"
 
 # Read the CSV file into a DataFrame
 df_raw = pd.read_csv(file_path)
@@ -47,10 +47,10 @@ df_SCPTu_SCPT = df_raw[(df_raw['test_type'] == 'SCPTu') | (df_raw['test_type'] =
 df_SCPTu_SCPT_mean = df_raw[(df_raw['test_type'] == 'SCPTu') | (df_raw['test_type'] == 'SCPT')]
 
 
-selected_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)', 'u0 (kPa)']
-selected_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)', 'u0 (kPa)', "σ',v (kPa)"]
+selected_columns_x_average = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)', 'u0 (kPa)', "σ',v (kPa)"]
 
-for column in selected_columns_x:
+
+for column in selected_columns_x_average:
     df_SCPTu_SCPT[column] = df_SCPTu_SCPT[column].rolling(window=50).mean()
     df_SCPTu_SCPT_mean[column+"_mean"] = df_SCPTu_SCPT_mean[column].rolling(window=50).mean()
 
@@ -75,24 +75,21 @@ print('-----------------------------------------\n')
 cm = 1/2.54  # centimeters in inches
 
 # Select columns
-#selected_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)', 'u2 (kPa)']
-selected_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)']
-selected_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)']
-#selected_columns_x = ['qc (MPa)', 'fs (kPa)', 'Rf (%)', 'u2 (kPa)',"σ',v (kPa)"]
-#selected_columns_x = ['qc (MPa)', 'fs (kPa)', 'Rf (%)', 'u0 (kPa)',"σ',v (kPa)"]
-#selected_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)', 'Rf (%)', 'u0 (kPa)', "σ',v (kPa)"]
-plot_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)','Vs (m/s)']
-plot_columns_x_label = ['Depth (m)','$q_c$ (MPa)', '$f_s$ (kPa)', '$v_s$ (m/s)']
-
+selected_columns_x = ['Depth (m)','qc (MPa)', 'fs (kPa)','Rf (%)','Vs (m/s)'] #for Machine learning features
+plot_columns_x_label = ['Depth (m)','$q_c$ (MPa)', '$f_s$ (kPa)','$R_f$ (%)', '$v_s$ (m/s)'] #for plotting purpose
 
 
 #Plot CPT: raw data and mean data
 unique_ids = df_SCPTu_SCPT_mean['ID'].unique()
 id_value = np.random.choice(unique_ids)
-plot_cpt_data((17*cm, 10*cm), plot_columns_x, df_raw, df_SCPTu_SCPT_mean, id_value=id_value, plot_columns_x_label=plot_columns_x_label)
+plot_cpt_data((17*cm, 10*cm), selected_columns_x, df_raw,
+              df_SCPTu_SCPT_mean, id_value=id_value,
+              plot_columns_x_label=plot_columns_x_label)
 plt.savefig(f"A_CPT_RAW_filterd_id_{id_value}.png", dpi=700)
 
-X = df_SCPTu_SCPT[selected_columns_x]#.to_numpy()
+
+
+X = df_SCPTu_SCPT[selected_columns_x[:-1]]#.to_numpy()
 y = df_SCPTu_SCPT['Vs (m/s)']#.to_numpy()
 
 
@@ -102,16 +99,20 @@ alpha = 0.5
 
 #Plot scatter points: raw data points as
 fig, axes = plt.subplots(4, 1, figsize=(8*cm, 20*cm), dpi=500, sharex=True)
-plotting_raw_data(X,y, alpha, s, color, 'Raw data', True, axes)
+plotting_raw_data(X,y, alpha, s, color, 'Raw data', True, axes, plot_columns_x_label)
 
-# df_SCPTu_SCPT = remove_outliers(df_SCPTu_SCPT, 'Vs (m/s)')
-# df_SCPTu_SCPT = df_SCPTu_SCPT[(df_SCPTu_SCPT['Vs (m/s)'] > 0)]
 
-# X = df_SCPTu_SCPT[selected_columns_x]#.to_numpy()
-# y = df_SCPTu_SCPT['Vs (m/s)']#.to_numpy()
+########################### REMOVE outliers
+df_SCPTu_SCPT = remove_outliers(df_SCPTu_SCPT, 'Vs (m/s)')
+df_SCPTu_SCPT = df_SCPTu_SCPT[(df_SCPTu_SCPT['Vs (m/s)'] > 0)]
 
-# plotting_raw_data(X,y, alpha, s, 'r', 'Removed outliers', False, axes)
+X = df_SCPTu_SCPT[selected_columns_x[:-1]]#.to_numpy()
+y = df_SCPTu_SCPT['Vs (m/s)']#.to_numpy()
+########################### REMOVE outliers
 
+
+
+plotting_raw_data(X,y, alpha, s, 'r', 'Removed outliers', False, axes, plot_columns_x_label)
 # Adjust layout to prevent overlapping
 plt.tight_layout()
 plt.savefig("B_Raw_data.png", dpi = 700)
@@ -165,11 +166,8 @@ study = optuna.create_study(direction='minimize')
 study.optimize(objective, n_trials=200)
 
 # Plot param importances and save the figure
-fig = plot_param_importances(study)
-fig.show()
-# Plot optimization history and save the figure
-fig = plot_optimization_history(study)
-fig.show()
+fig = plot_param_importances(study).show('browser')
+fig = plot_optimization_history(study).show('browser')
 
 print('Best hyperparameters:', study.best_params)
 print('Best RMSE:', study.best_value)
@@ -237,29 +235,32 @@ df_test_norwegen = df_test_norwegen.astype(float)
 
 
 data_preproccesed = df_test_norwegen[['Depth', 'Tip resistance', 'Sleeve friction']]
-#data_preproccesed['Rf (%)'] = df_test_norwegen['Sleeve friction'].values / df_test_norwegen['Tip resistance']
+data_preproccesed['Rf (%)'] = df_test_norwegen['Sleeve friction'].values / (df_test_norwegen['Tip resistance'] * 1000) * 100
 data_preproccesed['Shear wave'] = df_test_norwegen['Shear wave']
 data_preproccesed = data_preproccesed.astype(float)
 
 
-# for column in data_preproccesed.columns:
+# for column in data_preproccesed.columns[:-1]:
 #     data_preproccesed[column] = data_preproccesed[column].rolling(window=50).mean()
 
 column_mapping = {
     'Depth': 'Depth (m)',
     'Tip resistance': 'qc (MPa)',
     'Sleeve friction': 'fs (kPa)',
-#    'Rf (%)': 'Rf (%)',
+    'Rf (%)': 'Rf (%)',
     'Shear wave': 'Vs (m/s)'
 }
 
 # Rename columns in x_data_nor
 data_preproccesed = data_preproccesed.rename(columns=column_mapping)
-df_test_norwegen_raw = data_preproccesed
+df_test_norwegen_raw = data_preproccesed.copy()
+
+for column in data_preproccesed.columns[:-1]:
+    data_preproccesed[column] = data_preproccesed[column].rolling(window=50).mean()
 
 data_preproccesed_dropped = data_preproccesed.dropna(subset=['Vs (m/s)'])
 
-x_data_nor = data_preproccesed_dropped[selected_columns_x]
+x_data_nor = data_preproccesed_dropped[selected_columns_x[:-1]]
 y_data_nor = data_preproccesed_dropped['Vs (m/s)']
 
 print('-----------------------------------------\n')
@@ -274,7 +275,7 @@ print('-----------------------------------------\n')
 
 # plot_cpt_data_NW_site((17*cm, 10*cm), plot_columns_x, x_data_nor, y_data_nor, y_pred, plot_columns_x_label)
 
-plot_cpt_data_NW_site((17*cm, 10*cm), plot_columns_x, df_test_norwegen_raw, data_preproccesed, data_preproccesed_dropped, y_data_nor, y_pred, plot_columns_x_label)
+plot_cpt_data_NW_site((17*cm, 10*cm), selected_columns_x, df_test_norwegen_raw, data_preproccesed, data_preproccesed_dropped, y_data_nor, y_pred, plot_columns_x_label)
 plt.savefig("Norwegian_test_site_XGBRegressor.png", dpi = 700)
 
 
@@ -282,7 +283,7 @@ plt.savefig("Norwegian_test_site_XGBRegressor.png", dpi = 700)
 # =============================================================================
 # Comparison on test data
 # =============================================================================
-plot_cpt_data_ML_prediction((8*cm, 12*cm), df_raw, df_SCPTu_SCPT, id_value, selected_columns_x, final_model)
+plot_cpt_data_ML_prediction((8*cm, 12*cm), df_raw, df_SCPTu_SCPT, id_value, selected_columns_x[:-1], final_model)
 plt.savefig(f"u2_CPT_id_{id_value}_XGBRegressor.png", dpi = 700)
 
 
@@ -369,7 +370,7 @@ print('-----------------------------------------\n')
 # =============================================================================
 # Comparison on test data
 # =============================================================================
-plot_cpt_data_ML_prediction((8*cm, 12*cm), df_raw, df_SCPTu_SCPT, id_value, selected_columns_x, final_model)
+plot_cpt_data_ML_prediction((8*cm, 12*cm), df_raw, df_SCPTu_SCPT, id_value, selected_columns_x[:-1], final_model)
 plt.savefig(f"u2_CPT_id_{id_value}_HistGradientBoostingRegressor.png", dpi = 700)
 
 
@@ -385,7 +386,7 @@ from sklearn.ensemble import RandomForestRegressor
 check_column = []
 check = 0
 
-for column in selected_columns_x:
+for column in selected_columns_x[:-1]:
     if df_SCPTu_SCPT[column].isnull().any():
         check_column.append('nan')
         check = 0
@@ -398,10 +399,10 @@ for column in selected_columns_x:
         pass
     elif check == 1:
         # Drop rows with NaN values in the selected columns
-        df_SCPTu_SCPT.dropna(subset=selected_columns_x, inplace=True)
+        df_SCPTu_SCPT.dropna(subset=selected_columns_x[:-1], inplace=True)
 
 
-X = df_SCPTu_SCPT[selected_columns_x]#.to_numpy()
+X = df_SCPTu_SCPT[selected_columns_x[:-1]]#.to_numpy()
 y = df_SCPTu_SCPT['Vs (m/s)']#.to_numpy()
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,random_state=42)
@@ -516,5 +517,5 @@ print('-----------------------------------------\n')
 # =============================================================================
 # Comparison on test data
 # =============================================================================
-plot_cpt_data_ML_prediction((8*cm, 12*cm), df_raw, df_SCPTu_SCPT, id_value, selected_columns_x, final_model)
+plot_cpt_data_ML_prediction((8*cm, 12*cm), df_raw, df_SCPTu_SCPT, id_value, selected_columns_x[:-1], final_model)
 plt.savefig(f"u2_CPT_id_{id_value}_RandomForestRegressor.png", dpi = 700)
