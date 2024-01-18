@@ -227,6 +227,9 @@ test_model.fit(X, y)
 
 
 file_path = r"C:\Users\haris\Documents\GitHub\DATA-DRIVEN-SITE-CHARACTERIZATION\BBC\Sand\CPT\OYSC35.xlsx"
+file_path = r"C:\Users\haris\Documents\GitHub\DATA-DRIVEN-SITE-CHARACTERIZATION\BBC\Clay\ONSC23.xlsx"
+
+
 
 # Read the Excel file into a DataFrame
 df_test_norwegen = pd.read_excel(file_path)
@@ -256,7 +259,7 @@ data_preproccesed = data_preproccesed.rename(columns=column_mapping)
 df_test_norwegen_raw = data_preproccesed.copy()
 
 for column in data_preproccesed.columns[:-1]:
-    data_preproccesed[column] = data_preproccesed[column].rolling(window=50).mean()
+    data_preproccesed[column] = data_preproccesed[column].rolling(window=25).mean()
 
 data_preproccesed_dropped = data_preproccesed.dropna(subset=['Vs (m/s)'])
 
