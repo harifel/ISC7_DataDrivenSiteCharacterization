@@ -5,7 +5,7 @@ This repository contains code which is used in the conference paper of the [7th 
 ## Folder structure
 
 ```
-DataDrive
+DataDriven
 ├── data                                  - data
 ├── graphics                              - saved graphics from running scripts in src
 ├── src                                   - folder that contains the python script files
@@ -21,11 +21,11 @@ The environment is set up using `python`.
 
 To do this create an environment called `venv` using `environment.txt` with the help of `conda`. If you get pip errors, install pip libraries manually, e.g. `pip install pandas`
 ```bash
-C:\Users\haris\Documents\GitHub\DATA-DRIVEN-SITE-CHARACTERIZATION>C:\Users\haris\AppData\Local\Programs\Python\Python311\python -m venv DataDrive
+C:\Users\haris\Documents\GitHub\DATA-DRIVEN-SITE-CHARACTERIZATION>C:\Users\haris\AppData\Local\Programs\Python\Python311\python -m venv DataDriven
 ```
 
 Activate the new environment with:
 
 ```bash
-DataDrive\Scripts\activate
+DataDriven\Scripts\activate
 ```
