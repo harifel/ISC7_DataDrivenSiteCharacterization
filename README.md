@@ -2,7 +2,7 @@
 
 This repository contains code which is used in the conference paper of the [7th International Conference on Geotechnical and Geophysical Site Characterization](https://isc7.cimne.com/). In this contribution, machine learning models were trained to obtain shear wave velocity estimates based on in-situ tests. 
 
-The conference paper can be found here: 
+The conference paper can be found here: [Data-driven site characterization for numerical modelling - Felic et al. (2024)]() - DOI: xxxx
 
 ## Folder structure
 
@@ -37,4 +37,4 @@ Then, install all packages using 'environment.txt'. If you encounter pip errors,
 ```
 
 ## Database for Machine Learning
-The database is accessible on the website of the [Computational Geotechnics Group (Graz University of Technology)]([https://isc7.cimne.com/](https://www.tugraz.at/fileadmin/user_upload/Institute/IBG/Datenbank/Database_CPT_PremstallerGeotechnik.zip)https://www.tugraz.at/fileadmin/user_upload/Institute/IBG/Datenbank/Database_CPT_PremstallerGeotechnik.zip). A description of the database itself can be found in the paper by Oberhollenzer et al. (2019) - DOI: https://doi.org/10.1016/j.dib.2020.106618
+The database is accessible on the website of the [Computational Geotechnics Group (Graz University of Technology)]([https://isc7.cimne.com/](https://www.tugraz.at/fileadmin/user_upload/Institute/IBG/Datenbank/Database_CPT_PremstallerGeotechnik.zip)https://www.tugraz.at/fileadmin/user_upload/Institute/IBG/Datenbank/Database_CPT_PremstallerGeotechnik.zip). A description of the database itself can be found in the paper by Oberhollenzer et al. (2021) - DOI: https://doi.org/10.1016/j.dib.2020.106618
