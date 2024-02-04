@@ -21,7 +21,7 @@ DataDriven
 
 The environment is set up using `python`.
 
-To do this create an environment called `venv`.
+To achieve this, create an environment named `venv` and label it as DataDriven (or any other desired name).
 ```bash
 C:\Users\haris\Documents\GitHub\ISC7_DataDrivenSiteCharacterization>C:\Users\haris\AppData\Local\Programs\Python\Python311\python -m venv DataDriven
 ```
@@ -31,7 +31,7 @@ Activate the new environment with:
 C:\Users\haris\Documents\GitHub\ISC7_DataDrivenSiteCharacterization>DataDriven\Scripts\activate
 ```
 
-Install all packages using `environment.txt`. If you get pip errors, install pip libraries manually, e.g. `pip install pandas`
+Then, install all packages using 'environment.txt'. If you encounter pip errors, install the libraries manually, for example:
 ```bash
 (venv) C:\Users\haris\Documents\GitHub\ISC7_DataDrivenSiteCharacterization>py -m pip install -r environment.txt
 ```
