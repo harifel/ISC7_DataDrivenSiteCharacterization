@@ -2,7 +2,7 @@
 
 This repository contains code which is used in the conference paper of the [7th International Conference on Geotechnical and Geophysical Site Characterization](https://isc7.cimne.com/). In this contribution, machine learning models were trained to obtain shear wave velocity estimates based on in-situ tests. 
 
-The conference paper can be found here: 
+The conference paper can be found here: [Data-driven site characterization for numerical modelling - Felic et al. (2024)]() - DOI: xxxx
 
 ## Folder structure
 
@@ -21,13 +21,20 @@ DataDriven
 
 The environment is set up using `python`.
 
-To do this create an environment called `venv` using `environment.txt` with the help of `conda`. If you get pip errors, install pip libraries manually, e.g. `pip install pandas`
+To achieve this, create an environment named `venv` and label it as DataDriven (or any other desired name).
 ```bash
-C:\Users\haris\Documents\GitHub\DATA-DRIVEN-SITE-CHARACTERIZATION>C:\Users\haris\AppData\Local\Programs\Python\Python311\python -m venv DataDriven
+C:\Users\haris\Documents\GitHub\ISC7_DataDrivenSiteCharacterization>C:\Users\haris\AppData\Local\Programs\Python\Python311\python -m venv DataDriven
 ```
 
 Activate the new environment with:
-
 ```bash
-DataDriven\Scripts\activate
+C:\Users\haris\Documents\GitHub\ISC7_DataDrivenSiteCharacterization>DataDriven\Scripts\activate
 ```
+
+Then, install all packages using 'environment.txt'. If you encounter pip errors, install the libraries manually, for example:
+```bash
+(venv) C:\Users\haris\Documents\GitHub\ISC7_DataDrivenSiteCharacterization>py -m pip install -r environment.txt
+```
+
+## Database for Machine Learning
+The database is accessible on the website of the [Computational Geotechnics Group (Graz University of Technology)]([https://isc7.cimne.com/](https://www.tugraz.at/fileadmin/user_upload/Institute/IBG/Datenbank/Database_CPT_PremstallerGeotechnik.zip)https://www.tugraz.at/fileadmin/user_upload/Institute/IBG/Datenbank/Database_CPT_PremstallerGeotechnik.zip). A description of the database itself can be found in the paper by Oberhollenzer et al. (2021) - DOI: https://doi.org/10.1016/j.dib.2020.106618
