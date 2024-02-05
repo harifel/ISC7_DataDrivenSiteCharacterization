@@ -37,4 +37,4 @@ Then, install all packages using 'environment.txt'. If you encounter pip errors,
 ```
 
 ## Database for Machine Learning
-The database is accessible on the website of the [Computational Geotechnics Group (Graz University of Technology)]([https://isc7.cimne.com/](https://www.tugraz.at/fileadmin/user_upload/Institute/IBG/Datenbank/Database_CPT_PremstallerGeotechnik.zip)https://www.tugraz.at/fileadmin/user_upload/Institute/IBG/Datenbank/Database_CPT_PremstallerGeotechnik.zip). A description of the database itself can be found in the paper by Oberhollenzer et al. (2021) - DOI: https://doi.org/10.1016/j.dib.2020.106618
+The database is accessible on the website of the [Computational Geotechnics Group (Graz University of Technology)](https://www.tugraz.at/fileadmin/user_upload/Institute/IBG/Datenbank/Database_CPT_PremstallerGeotechnik.zip). A description of the database itself can be found in the paper by Oberhollenzer et al. (2021) - DOI: https://doi.org/10.1016/j.dib.2020.106618
