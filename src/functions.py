@@ -81,14 +81,24 @@ def plot_cpt_data(figsize, plot_columns_x, df_raw, df_SCPTu_SCPT, id_value, plot
 
     fig, axes = plt.subplots(1, len(plot_columns_x)-1, figsize=figsize, dpi=500, sharey=True)
     # Select data for the current ID
-    df_id = df_SCPTu_SCPT.loc[df_raw.loc[:,'ID'] == id_value]
+
+
+    df_id = df_raw.loc[df_raw.loc[:,'ID'] == id_value]
 
     for i, column in enumerate(plot_columns_x[1:-1]):
         # Plot measured data
         axes[i].plot(df_id[column].values,
                       df_id[plot_columns_x[0]].values,
                       label=f'Raw data (CPT ID {id_value})',
-                      marker='o', color='k', linewidth=0.5, markersize=2)
+                      marker='o', color='k', linewidth=0.2, markersize=2)
+
+    df_id = df_SCPTu_SCPT.loc[df_raw.loc[:,'ID'] == id_value]
+    for i, column in enumerate(plot_columns_x[1:-1]):
+        # Plot measured data
+        # axes[i].plot(df_id[column].values,
+        #               df_id[plot_columns_x[0]].values,
+        #               label=f'Raw data (CPT ID {id_value})',
+        #               marker='o', color='k', linewidth=0.5, markersize=2)
 
         axes[i].plot(df_id[column+"_mean"].values,
                       df_id[plot_columns_x[0]].values,
@@ -114,6 +124,7 @@ def plot_cpt_data(figsize, plot_columns_x, df_raw, df_SCPTu_SCPT, id_value, plot
                   marker='o', color='k', linewidth=0.5, markersize=2)
     axes[-1].set_xlabel(last_subplot_label)
 
+    axes[-1].set_xlim(xmin=0)
     axes[-1].grid(True, which='both')
     axes[-1].minorticks_on()
     plt.gca().invert_yaxis()
@@ -127,10 +138,10 @@ def plot_cpt_data_NW_site(figsize, plot_columns_x, df_site, df_smoothed, df_proc
         # Plot measured data
         axes[i].plot(df_site[column].values,
                       df_site[plot_columns_x[0]].values,
-                      #label='Raw data',
-                      marker='o', color='gray', linewidth = 0.2, markersize=2)
+                      label='Raw data',
+                      marker='o', color='k', linewidth = 0.2, markersize=2)
 
-        axes[i].set_ylim(ymin=0)
+        axes[i].set_ylim(ymin=0, ymax = 25)
         axes[i].set_xlim(xmin=0)
 
         axes[i].set_xlabel(plot_columns_x_label[i+1])
@@ -140,12 +151,12 @@ def plot_cpt_data_NW_site(figsize, plot_columns_x, df_site, df_smoothed, df_proc
         axes[i].minorticks_on()
         #axes[i].invert_yaxis()
 
-    for i, column in enumerate(plot_columns_x[1:-1]):
-        # Plot measured data
-        axes[i].plot(df_smoothed[column].values,
-                      df_smoothed[plot_columns_x[0]].values,
-                      #label='Smoothed data',
-                      marker='o', color='k', linewidth = 0.4, markersize=2)
+    # for i, column in enumerate(plot_columns_x[1:-1]):
+    #     # Plot measured data
+    #     axes[i].plot(df_smoothed[column].values,
+    #                   df_smoothed[plot_columns_x[0]].values,
+    #                   #label='Smoothed data',
+    #                   marker='o', color='k', linewidth = 0.4, markersize=2)
 
     for i, column in enumerate(plot_columns_x[1:-1]):
         # Plot measured data
@@ -165,15 +176,16 @@ def plot_cpt_data_NW_site(figsize, plot_columns_x, df_site, df_smoothed, df_proc
         #axes[i].invert_yaxis()
 
     axes[0].set_ylabel('Depth [m]')
+
     #axes[2].legend(loc='upper center', bbox_to_anchor=(0.5, 1.15), ncol=2)
 
     axes[-1].plot(y_true,
                   df_proccessed[plot_columns_x[0]].values,
-                  label='Raw',
+                  label='Raw data',
                   marker='o', color='k', linewidth = 0.5, markersize=2)
     axes[-1].plot(y_pred,
                 df_proccessed[plot_columns_x[0]].values,
-                label='ML',
+                label='Output ML',
                 marker='o', color='blue', linewidth = 0.5, markersize=2)
 
     axes[-1].set_xlabel(plot_columns_x_label[-1])
@@ -182,6 +194,8 @@ def plot_cpt_data_NW_site(figsize, plot_columns_x, df_site, df_smoothed, df_proc
     axes[-1].legend(loc='lower center')
     axes[-1].minorticks_on()
     axes[-1].invert_yaxis()
+    axes[-1].set_xlim(xmin=0)
+
 
     plt.tight_layout()
     return fig, axes
