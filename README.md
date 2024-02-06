@@ -28,7 +28,7 @@ C:\Users\haris\Documents\GitHub\ISC7_DataDrivenSiteCharacterization>C:\Users\har
 
 Activate the new environment with:
 ```bash
-C:\Users\haris\Documents\GitHub\ISC7_DataDrivenSiteCharacterization>DataDriven\Scripts\activate
+DataDriven\Scripts\activate
 ```
 
 Then, install all packages using 'environment.txt'. If you encounter pip errors, install the libraries manually, for example:
