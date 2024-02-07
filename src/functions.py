@@ -3,26 +3,29 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import PredictionErrorDisplay
 
 
-def plotting_raw_data(X, y, alpha, s, color, label, grid, axes, plot_columns_x_label):
+def plotting_raw_data(X, y, alpha, s, color, grid, axes, plot_columns_x_label, label, label_true):
 
     # First subplot
     axes[0].scatter(y, X.iloc[:, 0], alpha=alpha, s=s, c=color, label=label)
     axes[0].set_ylabel(plot_columns_x_label[0])
     if grid:
         axes[0].grid(linestyle = 'dotted', linewidth = 0.3)
-    axes[0].legend(loc='upper right')
+    if label_true:
+        axes[0].legend(loc='upper right')
 
     # Second subplot
     axes[1].scatter(y, X.iloc[:, 1], alpha=alpha, s=s, c=color, label=label)
     axes[1].set_ylabel(plot_columns_x_label[1])
     if grid:
         axes[1].grid(linestyle = 'dotted', linewidth = 0.3)
-    axes[1].legend(loc='upper right')
+    if label_true:
+        axes[1].legend(loc='upper right')
 
     # Third subplot
     axes[2].scatter(y, X.iloc[:, 2], alpha=alpha, s=s, c=color, label=label)
     axes[2].set_ylabel(plot_columns_x_label[2])
-    axes[2].legend(loc='upper right')
+    if label_true:
+        axes[2].legend(loc='upper right')
     if grid:
         axes[2].grid(linestyle = 'dotted', linewidth = 0.3)
 
@@ -30,7 +33,8 @@ def plotting_raw_data(X, y, alpha, s, color, label, grid, axes, plot_columns_x_l
     axes[3].scatter(y, X.iloc[:, 3], alpha=alpha, s=s, c=color, label=label)
     axes[3].set_xlabel(plot_columns_x_label[4])
     axes[3].set_ylabel(plot_columns_x_label[3])
-    axes[3].legend(loc='upper right')
+    if label_true:
+        axes[3].legend(loc='upper right')
     if grid:
         axes[3].grid(linestyle = 'dotted', linewidth = 0.3)
 
@@ -78,49 +82,46 @@ def error_plot(figsize, y_true, y_pred, title):
 def plot_cpt_data(figsize, plot_columns_x, df_raw, df_SCPTu_SCPT, id_value, plot_columns_x_label):
 
     fig, axes = plt.subplots(1, len(plot_columns_x)-1, figsize=figsize, dpi=500, sharey=True)
-    # Select data for the current ID
-
 
     df_id = df_raw.loc[df_raw.loc[:,'ID'] == id_value]
-
     for i, column in enumerate(plot_columns_x[1:-1]):
-        # Plot measured data
         axes[i].plot(df_id[column].values,
                       df_id[plot_columns_x[0]].values,
                       label=f'Raw data (CPT ID {id_value})',
-                      marker='o', color='k', linewidth=0.2, markersize=2)
+                      marker='o', color='k', linewidth=0.2, markersize=0.8)
+        axes[i].set_ylim(ymin=0)
+        axes[i].set_xlim(xmin=0)
 
     df_id = df_SCPTu_SCPT.loc[df_raw.loc[:,'ID'] == id_value]
     for i, column in enumerate(plot_columns_x[1:-1]):
-
         axes[i].plot(df_id[column+"_mean"].values,
                       df_id[plot_columns_x[0]].values,
                       label=f'Smoothed data (CPT ID {id_value})',
-                      marker='o', color='r', linewidth=0.5, markersize=2)
+                      marker='o', color='r', linewidth=0.2, markersize=0.8)
 
-        axes[i].set_ylim(ymin=0)
-        axes[i].set_xlim(xmin=0)
-        #axes[i].invert_yaxis()
 
         axes[0].set_ylabel(plot_columns_x_label[0])
         axes[i].set_xlabel(plot_columns_x_label[i+1])
         axes[i].grid(True, which='both', linestyle = 'dotted', linewidth = 0.3)
         axes[i].minorticks_on()
 
-    axes[0].legend(loc='upper center', bbox_to_anchor=(2.3, 1.15), ncol=2, handlelength = 2, labelspacing=2)
+
 
     # Use a different variable for the last subplot
     last_subplot_label = plot_columns_x_label[-1]
     axes[-1].plot(df_id[plot_columns_x[-1]].values,
                   df_id[plot_columns_x[0]].values,
                   label=f'Raw data (CPT ID {id_value})',
-                  marker='o', color='k', linewidth=0.5, markersize=2)
+                  marker='o', color='k', linewidth=0.2, markersize=0.8)
     axes[-1].set_xlabel(last_subplot_label)
 
     axes[-1].set_xlim(xmin=0)
-    axes[-1].grid(True, which='both')
+    axes[-1].grid(True, which='both', linestyle = 'dotted', linewidth = 0.3)
     axes[-1].minorticks_on()
-    plt.gca().invert_yaxis()
+    axes[-1].invert_yaxis()
+
+    return fig, axes
+
 
 
 def plot_cpt_data_NW_site(figsize, plot_columns_x, df_site, df_smoothed, df_proccessed, y_true, y_pred, plot_columns_x_label):
@@ -128,7 +129,6 @@ def plot_cpt_data_NW_site(figsize, plot_columns_x, df_site, df_smoothed, df_proc
     fig, axes = plt.subplots(1, len(plot_columns_x)-1, figsize=figsize, dpi=500, sharey=True)
 
     for i, column in enumerate(plot_columns_x[1:-1]):
-        # Plot measured data
         axes[i].plot(df_site[column].values,
                       df_site[plot_columns_x[0]].values,
                       label='Raw data',
@@ -143,7 +143,6 @@ def plot_cpt_data_NW_site(figsize, plot_columns_x, df_site, df_smoothed, df_proc
 
 
     for i, column in enumerate(plot_columns_x[1:-1]):
-        # Plot measured data
         axes[i].plot(df_proccessed[column].values,
                       df_proccessed[plot_columns_x[0]].values,
                       label='Input ML',
@@ -208,7 +207,8 @@ def plot_cpt_data_NW_site_all(figsize, plot_columns_x, df_site, df_proccessed, y
 
     axes[-1].set_xlabel(plot_columns_x_label[-1])
     axes[-1].grid(True, which='both', linestyle = 'dotted', linewidth = 0.3)
-    axes[-1].legend(loc='lower center', handlelength=1.5, labelspacing=0.3)
+    axes[-1].legend(loc='lower center', handlelength=1.5, labelspacing=0.3, frameon=True, bbox_to_anchor=(0.5, -0.02))
+
     axes[-1].minorticks_on()
     axes[-1].invert_yaxis()
     axes[-1].set_xlim(xmin=0)
@@ -252,7 +252,7 @@ def plot_cpt_data_ML_prediction(figsize, df_raw, df_SCPTu_SCPT, id_value, select
     plt.grid(True, which='both', linestyle = 'dotted', linewidth = 0.3)
 
     # Move the legend outside and to the top
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.17), ncol=1, handlelength = 2, labelspacing=2)
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.17), ncol=1, handlelength = 2, labelspacing=2, frameon=False)
     plt.tight_layout()
 
 
