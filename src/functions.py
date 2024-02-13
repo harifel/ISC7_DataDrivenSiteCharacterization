@@ -96,7 +96,7 @@ def plot_cpt_data(figsize, plot_columns_x, df_raw, df_SCPTu_SCPT, id_value, plot
     for i, column in enumerate(plot_columns_x[1:-1]):
         axes[i].plot(df_id[column+"_mean"].values,
                       df_id[plot_columns_x[0]].values,
-                      label=f'Smoothed data (CPT ID {id_value})',
+                      label=f'Data with moving average (CPT ID {id_value})',
                       marker='o', color='r', linewidth=0.2, markersize=0.8)
 
 
