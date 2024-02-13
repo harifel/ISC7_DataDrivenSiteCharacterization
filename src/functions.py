@@ -198,11 +198,11 @@ def plot_cpt_data_NW_site_all(figsize, plot_columns_x, df_site, df_proccessed, y
     axes[-1].plot(y_pred,
                 df_site[plot_columns_x[0]].values,
                 label='ML output',
-                marker='o', color='blue', linewidth = 0.2, markersize=0.8)
+                color='blue', linewidth = 0.6, markersize=0.0)
     axes[-1].plot(y_true,
                   df_proccessed[plot_columns_x[0]].values,
                   label='Raw data',
-                  marker='o', color='r', linewidth = 0.2, markersize=0.8)
+                  marker='o', color='r', linewidth = 0.6, markersize=0.8)
 
 
     axes[-1].set_xlabel(plot_columns_x_label[-1])
