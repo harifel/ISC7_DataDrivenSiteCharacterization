@@ -1,6 +1,6 @@
 # Data-driven site characterization with focus on small-strain stiffness
 
-This repository contains code which is used in the conference paper of the [7th International Conference on Geotechnical and Geophysical Site Characterization](https://isc7.cimne.com/). In this contribution, machine learning models were trained to obtain shear wave velocity estimates based on in-situ tests. 
+This repository contains the code used in the conference paper presented at the [7th International Conference on Geotechnical and Geophysical Site Characterization](https://isc7.cimne.com/). The paper details the training of machine learning models to obtain shear wave velocity estimates based on in-situ tests.
 
 The conference paper can be found here: [Data-driven site characterization with focus on small-strain stiffness - Felić et al. (2024)]() - DOI: xxxx
 
